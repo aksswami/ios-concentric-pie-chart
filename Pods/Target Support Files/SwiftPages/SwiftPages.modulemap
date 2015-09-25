@@ -1,0 +1,6 @@
+framework module SwiftPages {
+  umbrella header "SwiftPages-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,10 @@
+PODS:
+  - SwiftPages (1.1.0)
+
+DEPENDENCIES:
+  - SwiftPages
+
+SPEC CHECKSUMS:
+  SwiftPages: 1b24565cb91f24f4f912fbd9878a9c74b41a2ca6
+
+COCOAPODS: 0.38.2
