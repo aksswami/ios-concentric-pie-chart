@@ -18,6 +18,8 @@ class ASPieChart: UIView {
     }
     */
     
+    var circles: [ASPieChartCircle]!
+    
     var items: [ASPieChartDataItem]!
     
     var descriptionTextFont: UIFont = UIFont(name: "Avenir Medium", size: 18.0)!
@@ -28,15 +30,15 @@ class ASPieChart: UIView {
     
     var descriptionShadowOffset: CGSize = CGSizeMake(0, 1)
     
-    var duration: NSTimeInterval = 1.0
+    var duration: NSTimeInterval = 2.0
     
-    var showOnlyValues: Bool = true
+//    var showOnlyValues: Bool = true
     
-    var showAbsoluteValues: Bool = true
+//    var showAbsoluteValues: Bool = true
     
-    var labelPercentageCutoff: CGFloat = 0.0
+//    var labelPercentageCutoff: CGFloat = 0.0
     
-    var shouldHighlightSectorOnTouch: Bool = true
+//    var shouldHighlightSectorOnTouch: Bool = true
     
     var outerCircleRadius: CGFloat!
     
@@ -44,7 +46,7 @@ class ASPieChart: UIView {
     
     var enableMultipleSelection: Bool = false
     
-    private var selectedItems: [ASPieChartDataItem]!
+//    private var selectedItems: [ASPieChartDataItem]!
     
     private var pieLayer: CAShapeLayer!
     
@@ -52,80 +54,44 @@ class ASPieChart: UIView {
     
     private var contentView: UIView!
     
-    private var descriptionLabels: [NSObject]!
+//    private var descriptionLabels: [NSObject]!
     
-    private var sectorHighlight: CAShapeLayer!
+//    private var sectorHighlight: CAShapeLayer!
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    init(fromFrame frame: CGRect, items: [ASPieChartDataItem]) {
-        super.init(frame: frame)
-        self.items = items
-        self.selectedItems = []
-        self.endPercentages = []
         
-        loadDefault()
+    init(fromFrame frame: CGRect, circles: [ASPieChartCircle]) {
+        super.init(frame: frame)
+        self.circles = circles
+        
+        configureDefault()
     }
     
-    func loadDefault() {
-        var currentTotal: Double = 0
-        let total: Double = (items as AnyObject).valueForKeyPath("@sum.value") as! Double
-        for (index,item) in items.enumerate() {
-            if total == 0 {
-                endPercentages.append(1.0 / Double(items.count * (index + 1)))
-            }
-            else {
-                currentTotal += Double(item.value)
-                endPercentages.append(currentTotal / total)
-            }
-        }
+    func configureDefault() {
         contentView?.removeFromSuperview()
         contentView = UIView.init(frame: self.bounds)
-        
         self.addSubview(contentView)
-        pieLayer = CAShapeLayer.init()
-        contentView.layer.addSublayer(pieLayer)
         
-    }
-
-    func recompute() {
-        outerCircleRadius = CGRectGetWidth(self.bounds) / 2
-        innerCircleRadius = CGRectGetWidth(self.bounds) / 6
+        for circle in circles as [ASPieChartCircle] {
+            contentView.layer.addSublayer(circle.pieLayer)
+        }
     }
     
     func strokeChart() {
-        loadDefault()
-        recompute()
-        for (index, item) in items.enumerate() {
-            
-            let startPercentage = startPercentageForItemAtIndex(index)
-            let endPercentage = endPercentageForItemAtIndex(index)
-            
-            let radius = innerCircleRadius + (outerCircleRadius - innerCircleRadius) / 2
-            let borderWidth = outerCircleRadius - innerCircleRadius
-            
-            let currentPieLayer = newCircleLayerWithRadius(radius, borderWidth: borderWidth, fillColor: UIColor.clearColor(), borderColor: item.color, startPercentage: startPercentage, endPercentage: endPercentage)
-            
-            pieLayer.addSublayer(currentPieLayer)
+        configureDefault()
+        
+        for circle in circles as [ASPieChartCircle] {
+            for (index, dataItem) in circle.dateItems.enumerate() {
+                let startPercentage = circle.startPercentageForItemAtIndex(index)
+                let endPercentage = circle.endPercentageForItemAtIndex(index)
+                
+                let currentPieLayer = newCircleLayerWithRadius(circle.radius, borderWidth: circle.borderWidth, fillColor: UIColor.clearColor(), borderColor: dataItem.color, startPercentage: startPercentage, endPercentage: endPercentage)
+                circle.pieLayer.addSublayer(currentPieLayer)
+            }
         }
         maskChart()
-    }
-    
-    func startPercentageForItemAtIndex(index: Int) -> CGFloat {
-        if index == 0 {
-            return 0
-        }
-        return CGFloat(endPercentages[index - 1])
-    }
-    
-    func endPercentageForItemAtIndex(index: Int) -> CGFloat {
-        return CGFloat(endPercentages[index])
-    }
-    
-    func ratioForItemAtIndex(index: Int) -> CGFloat {
-        return endPercentageForItemAtIndex(index) - startPercentageForItemAtIndex(index)
     }
     
     func newCircleLayerWithRadius(radius: CGFloat, borderWidth: CGFloat, fillColor: UIColor, borderColor: UIColor, startPercentage: CGFloat, endPercentage: CGFloat) -> CAShapeLayer {
@@ -144,19 +110,42 @@ class ASPieChart: UIView {
         return circle
     }
     
-    func maskChart(){
-        let radius: CGFloat = innerCircleRadius + (outerCircleRadius - innerCircleRadius) / 2
-        let borderWidth: CGFloat = outerCircleRadius - innerCircleRadius
-        let maskLayer: CAShapeLayer = newCircleLayerWithRadius(radius, borderWidth: borderWidth, fillColor: UIColor.clearColor(), borderColor: UIColor.blackColor(), startPercentage: 0, endPercentage: 1)
-        
-        pieLayer.mask = maskLayer;
-        let animation: CABasicAnimation = CABasicAnimation.init(keyPath: "strokeEnd")
-        animation.duration = duration
-        animation.fromValue = NSInteger.init(0)
-        animation.toValue = NSInteger.init(1)
-        animation.timingFunction = CAMediaTimingFunction.init(name: kCAMediaTimingFunctionEaseInEaseOut)
-        animation.removedOnCompletion = true
-        maskLayer.addAnimation(animation, forKey: "circleAnimation")
+    func maskChart() {
+        for (index, circle) in circles.enumerate() {
+            let maskLayer: CAShapeLayer = newCircleLayerWithRadius(circle.radius, borderWidth: circle.borderWidth, fillColor: UIColor.clearColor(), borderColor: UIColor.blackColor(), startPercentage: 0, endPercentage: 1)
+            circle.pieLayer.mask = maskLayer
+            let animation: CABasicAnimation = CABasicAnimation.init(keyPath: "strokeEnd")
+            animation.setValue(index, forKey: "id")
+            animation.duration = duration
+            animation.fromValue = NSInteger.init(0)
+            animation.toValue = NSInteger.init(1)
+            animation.timingFunction = CAMediaTimingFunction.init(name: kCAMediaTimingFunctionEaseInEaseOut)
+            animation.removedOnCompletion = true
+            animation.delegate = self
+            animation.beginTime = CACurrentMediaTime() + duration * Double(index)
+            circle.maskLayerAnimation = animation
+        }
+        kickOffAnimation()
+    }
+    
+    func kickOffAnimation(){
+        if circles.count > 1 {
+            circles[0].pieLayer?.hidden = false
+            if let animation = circles[0].maskLayerAnimation {
+                circles[0].pieLayer.mask?.addAnimation(animation, forKey: "circleAnimation\(0)")
+            }
+        }
+    }
+    
+    override func animationDidStop(anim: CAAnimation, finished flag: Bool) {
+        let index: Int = (anim.valueForKey("id")?.integerValue)!
+        if index >= 0 && (index + 1) < circles.count && flag {
+            circles[index + 1].pieLayer?.hidden = false
+            if let animation = circles[index + 1].maskLayerAnimation {
+                 circles[index + 1].pieLayer.mask?.addAnimation(animation, forKey: "circleAnimation\(index)")
+            }
+           
+        }
     }
     
     override func layoutSubviews() {

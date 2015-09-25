@@ -26,8 +26,12 @@ class ViewController: UIViewController {
         let pieChart = PNPieChart(frame: CGRectMake(200, 100, 200, 200), items: items)
         view.addSubview(pieChart)
         
-        let newItems = [ASPieChartDataItem(value: 10, color: UIColor.brownColor()), ASPieChartDataItem(value: 40, color: UIColor.blackColor()), ASPieChartDataItem(value: 5, color: UIColor.yellowColor())]
-        let newPieChart = ASPieChart(fromFrame: CGRectMake(0, 300, 200, 200), items: newItems)
+        let newItems = [ASPieChartDataItem(value: 10, color: UIColor.brownColor()), ASPieChartDataItem(value: 40, color: UIColor.greenColor()), ASPieChartDataItem(value: 5, color: UIColor.yellowColor())]
+        
+        let newItems1 = [ASPieChartDataItem(value: 20, color: UIColor.lightGrayColor()), ASPieChartDataItem(value: 20, color: UIColor.purpleColor()), ASPieChartDataItem(value: 20, color: UIColor.redColor()), ASPieChartDataItem(value: 40, color: UIColor.greenColor()), ASPieChartDataItem(value: 5, color: UIColor.yellowColor())]
+        
+        let circles = [ASPieChartCircle(withInnerRadius: 50, thickness: 40, dataItems: newItems), ASPieChartCircle(withInnerRadius: 100, thickness: 15, dataItems: newItems1)]
+        let newPieChart = ASPieChart(fromFrame: CGRectMake(50, 300, 200, 200), circles:circles)
         newPieChart.strokeChart()
         
         view.addSubview(newPieChart)
