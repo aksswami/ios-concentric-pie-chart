@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         view.addSubview(circleChart)
         
         
-        let items = [PNPieChartDataItem(value: 10, color: UIColor.redColor()), PNPieChartDataItem(value: 30, color: UIColor.blueColor()), PNPieChartDataItem(value: 50, color: UIColor.greenColor())]
+        let items = [PNPieChartDataItem(value: 10, color: UIColor.redColor(), description: "Google"), PNPieChartDataItem(value: 30, color: UIColor.blueColor(), description: "AppleApple Apple"), PNPieChartDataItem(value: 50, color: UIColor.greenColor())]
         
         let pieChart = PNPieChart(frame: CGRectMake(200, 100, 200, 200), items: items)
         view.addSubview(pieChart)
@@ -42,7 +42,5 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
 }
 
