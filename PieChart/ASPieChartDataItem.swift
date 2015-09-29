@@ -13,6 +13,9 @@ class ASPieChartDataItem: NSObject {
     var value: CGFloat
     var color:UIColor!
     var textDescription:String!
+    internal var itemCenterPoint: CGPoint!
+    internal var labelCirclePoint: CGPoint!
+    internal var itemCenterAngel: CGFloat!
     
     init(fromValue value: CGFloat, color: UIColor, textDescription: String) {
         self.value = value

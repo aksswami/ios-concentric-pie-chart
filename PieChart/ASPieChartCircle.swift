@@ -55,16 +55,19 @@ class ASPieChartCircle: NSObject {
                 currentTotal += Double(dataItem.value)
                 endPercentages.append(currentTotal / total)
             }
+            let centerPercentage: Double = Double((startPercentageForItemAtIndex(index) + (endPercentageForItemAtIndex(index) - startPercentageForItemAtIndex(index)) / 2))
+            var centerPercentageAngle: Double = centerPercentage * (M_PI * 2) - M_PI_2
+            dataItem.itemCenterAngel = CGFloat(centerPercentageAngle)
             
-            var centerPercentage: Double = Double((startPercentageForItemAtIndex(index) + (endPercentageForItemAtIndex(index) - startPercentageForItemAtIndex(index)) / 2) * CGFloat(M_PI * 2))
-            if centerPercentage < M_PI {
-                centerPercentage = M_PI - centerPercentage
+            
+            if centerPercentageAngle < M_PI {
+                centerPercentageAngle = M_PI - centerPercentageAngle
             }
             else {
-                centerPercentage = 3 * M_PI - centerPercentage
+                centerPercentageAngle = 3 * M_PI - centerPercentageAngle
             }
             
-            arcCenterPointAngle.append(CGFloat(centerPercentage))
+            arcCenterPointAngle.append(CGFloat(centerPercentageAngle))
         }
     }
     
